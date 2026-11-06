@@ -38,7 +38,7 @@ room = st.text_area(
 style = st.selectbox("Pick a style", STYLES)
 
 # Fast text-to-image model that works on the free tier.
-MODEL = "black-forest-labs/FLUX.1-schnell"
+MODEL = "stabilityai/stable-diffusion-3-medium-diffusers"
 
 if st.button("Generate design", type="primary"):
     if not HF_TOKEN:
