@@ -42,8 +42,7 @@ if st.button("Generate design", type="primary"):
     if not room.strip():
         st.warning("Describe your room first — the AI needs something to work with.")
         st.stop()
-
-       prompt = f"Photorealistic interior design photo, sharp focus, high detail, well lit, {style.lower()} style: {room.strip()}" 
+prompt = f"Photorealistic interior design photo, sharp focus, high detail, well lit, {style.lower()} style: {room.strip()}" 
 
     # Pollinations draws from a URL: the prompt goes in the address,
     # URL-encoded. A random seed means each tap draws a fresh design
