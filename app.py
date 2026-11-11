@@ -43,7 +43,7 @@ if st.button("Generate design", type="primary"):
         st.warning("Describe your room first — the AI needs something to work with.")
         st.stop()
 
-    prompt = f"Photorealistic interior design photo, {style.lower()} style: {room.strip()}"
+       prompt = f"Photorealistic interior design photo, sharp focus, high detail, well lit, {style.lower()} style: {room.strip()}" 
 
     # Pollinations draws from a URL: the prompt goes in the address,
     # URL-encoded. A random seed means each tap draws a fresh design
@@ -52,7 +52,7 @@ if st.button("Generate design", type="primary"):
     seed = random.randint(1, 999_999)
     url = (
         f"https://image.pollinations.ai/prompt/{encoded}"
-        f"?width=1024&height=768&seed={seed}&nologo=true"
+                f"?width=1280&height=960&seed={seed}&nologo=true"
     )
 
     with st.spinner("Asking the AI for your design..."):
