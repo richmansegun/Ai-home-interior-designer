@@ -1,26 +1,27 @@
 """AI Home Interior Designer — starter scaffold (free path: text-to-image).
 
-You describe the room + pick a style -> the app asks Hugging Face for a
-fresh AI-generated design image. This is YOUR starting point: extend it
-with style presets, a gallery, prompt history, or (later, paid) photo
-restyling via image-to-image.
+You describe the room + pick a style -> the app asks a free image
+service for a fresh AI-generated design image. This is YOUR starting
+point: extend it with style presets, a gallery, a download button,
+or saved designs.
 
-Free-path facts (verified 2026-10-11):
-- HF Inference Providers gives free accounts $0.10/month credit
-  (subject to change) — enough to build and test.
-- Text-to-image is covered; image-to-image (photo restyling) is not.
-- Call it with InferenceClient(provider="hf-inference", ...).
+History (kept honest, for the project README):
+- v1 used Hugging Face Inference Providers (FLUX.1-schnell). HF first
+  retired that model on hf-inference ("410 Gone"), and on 2026-10-07
+  removed free accounts' included monthly inference credit, so free
+  calls to the remaining models now fail with "402 Payment Required".
+- v2 therefore draws with Pollinations (image.pollinations.ai):
+  free, no account, no token, no card. Everything else is unchanged.
 """
-import os
+import random
+import urllib.parse
 
+import requests
 import streamlit as st
-from huggingface_hub import InferenceClient
 
 st.set_page_config(page_title="AI Home Interior Designer", layout="centered")
 st.title("🏠 AI Home Interior Designer")
 st.caption("Starter scaffold — ₦0 text-to-image path. Your build, your code.")
-
-HF_TOKEN = st.secrets.get("HF_TOKEN", os.environ.get("HF_TOKEN"))
 
 STYLES = [
     "Modern minimalist",
@@ -37,26 +38,31 @@ room = st.text_area(
 )
 style = st.selectbox("Pick a style", STYLES)
 
-# Fast text-to-image model that works on the free tier.
-MODEL = "stabilityai/stable-diffusion-3-medium-diffusers"
-
 if st.button("Generate design", type="primary"):
-    if not HF_TOKEN:
-        st.error("No Hugging Face token found. Follow SETUP.md step 2, then come back.")
-        st.stop()
     if not room.strip():
         st.warning("Describe your room first — the AI needs something to work with.")
         st.stop()
 
     prompt = f"Photorealistic interior design photo, {style.lower()} style: {room.strip()}"
 
+    # Pollinations draws from a URL: the prompt goes in the address,
+    # URL-encoded. A random seed means each tap draws a fresh design
+    # instead of returning a cached copy of the same prompt.
+    encoded = urllib.parse.quote(prompt)
+    seed = random.randint(1, 999_999)
+    url = (
+        f"https://image.pollinations.ai/prompt/{encoded}"
+        f"?width=1024&height=768&seed={seed}&nologo=true"
+    )
+
     with st.spinner("Asking the AI for your design..."):
         try:
-            client = InferenceClient(provider="hf-inference", api_key=HF_TOKEN)
-            image = client.text_to_image(prompt, model=MODEL)  # returns a PIL Image
-        except Exception as e:  # e.g. credit exhausted or bad token
+            response = requests.get(url, timeout=180)
+            response.raise_for_status()
+            image_bytes = response.content
+        except Exception as e:  # e.g. service busy or no network
             st.error(f"Generation failed: {e}")
             st.stop()
 
-    st.image(image, caption=f"{style} — generated from your description")
+    st.image(image_bytes, caption=f"{style} — generated from your description")
     st.success("Done. This is your scaffold — now make it yours.")
