@@ -66,3 +66,9 @@ if st.button("Generate design", type="primary"):
 
     st.image(image_bytes, caption=f"{style} — generated from your description")
     st.success("Done. This is your scaffold — now make it yours.")
+    st.download_button(
+        "Download this design",
+        data=image_bytes,
+        file_name="my-design.png",
+        mime="image/png",
+    )  
