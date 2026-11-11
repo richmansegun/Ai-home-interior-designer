@@ -23,6 +23,9 @@ st.set_page_config(page_title="AI Home Interior Designer", layout="centered")
 st.title("🏠 AI Home Interior Designer")
 st.caption("Starter scaffold — ₦0 text-to-image path. Your build, your code.")
 
+if "saved" not in st.session_state:
+    st.session_state.saved = []
+
 STYLES = [
     "Modern minimalist",
     "Scandinavian",
@@ -71,3 +74,19 @@ if st.button("Generate design", type="primary"):
         file_name="my-design.png",
         mime="image/png",
     )
+
+    st.session_state.saved.append(
+        {"room": room.strip(), "style": style, "image": image_bytes}
+    )
+
+st.divider()
+st.subheader("My saved designs")
+
+if not st.session_state.saved:
+    st.write("Nothing saved yet — generate a design and it will appear here.")
+else:
+    for saved in reversed(st.session_state.saved):
+        st.image(saved["image"], caption=f"{saved['style']}: {saved['room']}")
+    if st.button("Clear saved designs"):
+        st.session_state.saved = []
+        st.rerun()
