@@ -12,6 +12,10 @@ History (kept honest, for the project README):
   calls to the remaining models now fail with "402 Payment Required".
 - v2 therefore draws with Pollinations (image.pollinations.ai):
   free, no account, no token, no card. Everything else is unchanged.
+- v5 adds a built-in Nigerian instruction (on by default): every
+  design is guided toward a real Nigerian home — warm climate,
+  local materials and fabrics — so the app solves a Nigerian
+  problem without the user typing it every time.
 """
 import random
 import urllib.parse
@@ -25,6 +29,18 @@ st.caption("Starter scaffold — ₦0 text-to-image path. Your build, your code.
 
 if "saved" not in st.session_state:
     st.session_state.saved = []
+
+# Built-in Nigerian instruction (v5): the system prompt baked into
+# every generation. It steers the image toward a Nigerian home —
+# tropical climate, local materials, local fabrics — and away from
+# cold-climate features (fireplaces, radiators, heavy carpets).
+NIGERIAN_GUIDE = (
+    "Nigerian home in a warm tropical climate: warm earthy tones, "
+    "local hardwood furniture, Ankara or Aso-Oke fabric accents, "
+    "ceiling fan, large windows with sheer curtains for airflow and "
+    "daylight, tiled floors, practical for heat and humidity, "
+    "no fireplace, no radiator, no heavy carpet"
+)
 
 STYLES = [
     "Modern minimalist",
@@ -40,12 +56,15 @@ room = st.text_area(
     placeholder="e.g. A small bedroom, 3m by 4m, one window on the left, white walls...",
 )
 style = st.selectbox("Pick a style", STYLES)
+nigerian = st.checkbox("Nigerian home touches", value=True)
 
 if st.button("Generate design", type="primary"):
     if not room.strip():
         st.warning("Describe your room first — the AI needs something to work with.")
         st.stop()
     prompt = f"Photorealistic interior design photo, sharp focus, high detail, well lit, {style.lower()} style: {room.strip()}"
+    if nigerian:
+        prompt = f"{prompt}. {NIGERIAN_GUIDE}"
 
     # Pollinations draws from a URL: the prompt goes in the address,
     # URL-encoded. A random seed means each tap draws a fresh design
