@@ -206,4 +206,12 @@ else:
             caption = item.get("context", {}).get("custom", {}).get("caption") or item.get(
                 "public_id", ""
             )
-            st.image(item["secure_url"], caption=caption)
+            # The tag list does not include a ready URL, so build the
+            # delivery URL from the public id, version and format.
+            version = item.get("version")
+            version_part = f"v{version}/" if version else ""
+            image_url = (
+                f"https://res.cloudinary.com/{CLOUD_NAME}/image/upload/"
+                f"{version_part}{item['public_id']}.{item.get('format', 'jpg')}"
+            )
+            st.image(image_url, caption=caption)
